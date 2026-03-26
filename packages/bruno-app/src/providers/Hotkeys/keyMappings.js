@@ -21,6 +21,16 @@ const KeyMapping = {
     windows: 'ctrl+pagedown',
     name: 'Switch to Next Tab'
   },
+  switchToNextTabAlt: {
+    mac: 'ctrl+tab',
+    windows: 'ctrl+tab',
+    name: 'Switch to Next Tab (Ctrl+Tab)'
+  },
+  switchToPreviousTabAlt: {
+    mac: 'ctrl+shift+tab',
+    windows: 'ctrl+shift+tab',
+    name: 'Switch to Previous Tab (Ctrl+Shift+Tab)'
+  },
   moveTabLeft: {
     mac: 'command+shift+pageup',
     windows: 'ctrl+shift+pageup',

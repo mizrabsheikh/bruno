@@ -112,16 +112,24 @@ export const tabsSlice = createSlice({
         return;
       }
 
-      const direction = action.payload.direction;
+      const { direction, tabIndex } = action.payload;
 
       const activeTabIndex = state.tabs.findIndex((t) => t.uid === state.activeTabUid);
 
-      let toBeActivatedTabIndex = 0;
+      let toBeActivatedTabIndex;
 
       if (direction == 'pageup') {
         toBeActivatedTabIndex = (activeTabIndex - 1 + state.tabs.length) % state.tabs.length;
       } else if (direction == 'pagedown') {
         toBeActivatedTabIndex = (activeTabIndex + 1) % state.tabs.length;
+      } else if (direction === 'index') {
+        if (tabIndex >= 0 && tabIndex < state.tabs.length) {
+          toBeActivatedTabIndex = tabIndex;
+        } else {
+          return;
+        }
+      } else {
+        return;
       }
 
       state.activeTabUid = state.tabs[toBeActivatedTabIndex].uid;

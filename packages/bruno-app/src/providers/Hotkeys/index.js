@@ -15,7 +15,7 @@ import {
   closeTabs
 } from 'providers/ReduxStore/slices/collections/actions';
 import { findCollectionByUid, findItemInCollection } from 'utils/collections';
-import { addTab, reorderTabs, switchTab } from 'providers/ReduxStore/slices/tabs';
+import { addTab, focusTab, reorderTabs, switchTab } from 'providers/ReduxStore/slices/tabs';
 import { toggleSidebarCollapse } from 'providers/ReduxStore/slices/app';
 import { getKeyBindingsForActionAllOS } from './keyMappings';
 
@@ -221,6 +221,63 @@ export const HotkeysProvider = (props) => {
       Mousetrap.unbind([...getKeyBindingsForActionAllOS('switchToNextTab')]);
     };
   }, [dispatch]);
+
+  // Switch to the next tab (Ctrl+Tab)
+  useEffect(() => {
+    Mousetrap.bind([...getKeyBindingsForActionAllOS('switchToNextTabAlt')], () => {
+      const activeTab = find(tabs, (t) => t.uid === activeTabUid);
+      if (!activeTab) return false;
+      const collectionTabs = tabs.filter((t) => t.collectionUid === activeTab.collectionUid);
+      if (collectionTabs.length < 2) return false;
+      const currentIndex = collectionTabs.findIndex((t) => t.uid === activeTabUid);
+      const nextIndex = (currentIndex + 1) % collectionTabs.length;
+      dispatch(focusTab({ uid: collectionTabs[nextIndex].uid }));
+      return false;
+    });
+
+    return () => {
+      Mousetrap.unbind([...getKeyBindingsForActionAllOS('switchToNextTabAlt')]);
+    };
+  }, [tabs, activeTabUid, dispatch]);
+
+  // Switch to the previous tab (Ctrl+Shift+Tab)
+  useEffect(() => {
+    Mousetrap.bind([...getKeyBindingsForActionAllOS('switchToPreviousTabAlt')], () => {
+      const activeTab = find(tabs, (t) => t.uid === activeTabUid);
+      if (!activeTab) return false;
+      const collectionTabs = tabs.filter((t) => t.collectionUid === activeTab.collectionUid);
+      if (collectionTabs.length < 2) return false;
+      const currentIndex = collectionTabs.findIndex((t) => t.uid === activeTabUid);
+      const prevIndex = (currentIndex - 1 + collectionTabs.length) % collectionTabs.length;
+      dispatch(focusTab({ uid: collectionTabs[prevIndex].uid }));
+      return false;
+    });
+
+    return () => {
+      Mousetrap.unbind([...getKeyBindingsForActionAllOS('switchToPreviousTabAlt')]);
+    };
+  }, [tabs, activeTabUid, dispatch]);
+
+  // Switch to tab by position (Ctrl+1 through Ctrl+9)
+  // Only operates on the visible collection tabs (same collection as the active tab)
+  useEffect(() => {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    keys.forEach((key, index) => {
+      Mousetrap.bind(`ctrl+${key}`, () => {
+        const activeTab = find(tabs, (t) => t.uid === activeTabUid);
+        if (!activeTab) return false;
+        const collectionTabs = tabs.filter((t) => t.collectionUid === activeTab.collectionUid);
+        if (index < collectionTabs.length) {
+          dispatch(focusTab({ uid: collectionTabs[index].uid }));
+        }
+        return false;
+      });
+    });
+
+    return () => {
+      keys.forEach((key) => Mousetrap.unbind(`ctrl+${key}`));
+    };
+  }, [tabs, activeTabUid, dispatch]);
 
   // Close all tabs
   useEffect(() => {
